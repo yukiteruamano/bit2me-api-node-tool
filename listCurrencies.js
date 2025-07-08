@@ -12,13 +12,10 @@ const { SERVER, END_CURRENCIES, END_C_SETTINGS } = process.env;
 const listCurrencies = async () => {
 
     try {
-        const headers = { 
-            'Accept-Encoding': 'gzip, deflate, br, zstd' 
-        }
 
         const [data, datacur, datafee] = await Promise.all([
-            axios.get(`${SERVER}${END_CURRENCIES}`, { headers: headers }),
-            axios.get(`${SERVER}${END_C_SETTINGS}`, { headers: headers }),
+            axios.get(`${SERVER}${END_CURRENCIES}`),
+            axios.get(`${SERVER}${END_C_SETTINGS}`),
             getCurrencyWdInfo()
         ]);
 
@@ -28,17 +25,20 @@ const listCurrencies = async () => {
                 .filter(([, value]) => !value.removedAt)
                 .map(async ([key, value]) => {
                     const networks = await getNetworks(key);
-                    const actionsEntry = datacur.data.find((cur) => cur.symbol === key);
-                    const feesEntry = datafee.find((fee) => fee.symbol === key);
 
-                    const networksWithFees = networks?.map(network => {
-                        const fee = feesEntry?.networks?.find(n => n.networkId === network.id);
-                        return (fee) ? {
-                            ...network,
-                            minimumWithdrawal: fee.minimumWithdrawal || null,
-                            withdrawalFee: fee.withdrawalFee || null
-                        } : network;
-                    });
+
+                        const actionsEntry = datacur?.data?.find((cur) => cur.symbol === key);
+
+                        const feesEntry = datafee.find((fee) => fee.symbol === key);
+
+                        const networksWithFees = networks?.map(network => {
+                            const fee = feesEntry?.networks?.find(n => n.networkId === network.id);
+                            return (fee) ? {
+                                ...network,
+                                minimumWithdrawal: fee.minimumWithdrawal || null,
+                                withdrawalFee: fee.withdrawalFee || null
+                            } : network;
+                        });
 
                     return [
                         key,

@@ -11,10 +11,10 @@ const SUBACCOUNT = args[0]
 
 const getJWT = async () => {
     try{
-        const embed = await getEmbedToken(SUBACCOUNT);
+        const auth = await getAuthToken(SUBACCOUNT);
         
-        if(embed){
-            const jwt = await getAuthToken(embed);
+        if(auth){
+            const jwt = await getEmbedToken(auth);
             (jwt) ? console.log(`Your JWT is: ${jwt}\n\nYou can decode it by pasting it here: https://jwt.io/`) : console.log("Something went wrong. Please try again.");
         }
     }

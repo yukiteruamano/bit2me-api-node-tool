@@ -23,9 +23,9 @@ const openWss = async (action = "listen") => {
             ////TRACE: console.log("wss connected");
             reconnectAttempts = 0;
             try{
-                const embed = await getEmbedToken();
-                if(!embed) return ;
-                ws.send (JSON.stringify ({ type: 'authenticate', payload: { token: await getAuthToken(embed) }}));
+                const auth = await getAuthToken();
+                if(!auth) return ;
+                ws.send (JSON.stringify ({ type: 'authenticate', payload: { token: auth }}));
             }
             catch(e){
                 console.error(e.response.data);
