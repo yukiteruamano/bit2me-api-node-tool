@@ -86,7 +86,9 @@ const withdrawCrypto = async () => {
                 // Travel Rule
                 const trBody = {
                     "walletType": "unhosted",
-                    "walletOwnership": "own"
+                    "walletOwnership": "own",
+                    "personType": "person", // or company
+                    "name": "user" // name of the beneficiary
                 }
                 const trPath = TRAVEL_RULE_INFO + response.data.id;
 
