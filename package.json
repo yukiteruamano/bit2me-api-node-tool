@@ -1,6 +1,6 @@
 {
   "name": "bit2me-api-node-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NodeJS tool to help use and understand the Bit2Me Broker API",
   "scripts": {
     "market-quotes": "node --env-file .env marketQuotes.js",
@@ -25,7 +25,15 @@
     "wd-crypto": "node --env-file .env withdrawCrypto.js",
     "wd-fiat": "node --env-file .env withdrawEUR.js",
     "pay": "node --env-file .env socialPay.js",
-    "jwt": "node --env-file .env jwt.js"
+    "jwt": "node --env-file .env jwt.js",
+    "account-details": "node --env-file .env accountDetails.js",
+    "check-identity": "node --env-file .env checkIdentityStatus.js",
+    "create-order": "node --env-file .env createOrder.js",
+    "list-orders": "node --env-file .env listOrders.js",
+    "earn-summary": "node --env-file .env showEarnSummary.js",
+    "list-earn-wallets": "node --env-file .env listEarnWallets.js",
+    "get-market-data": "node --env-file .env getMarketData.js",
+    "get-ticker-info": "node --env-file .env getTickerInfo.js"
   },
   "author": "Bit2Me",
   "license": "Apache-2.0",
