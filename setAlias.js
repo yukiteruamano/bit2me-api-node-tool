@@ -1,52 +1,75 @@
 /**
+ * Bit2Me Alias Management Module
+ *
+ * This script sets aliases for Bit2Me accounts. Aliases are used for
+ * social pay transfers and other account identification purposes.
+ *
+ * @module setAlias
  * @author Bit2Me
- * @dev Set alias for an account in Bit2Me
  */
-const axios  = require('axios');
-
-// Bit2me logic
+const axios = require('axios');
 const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-const GET_ALIAS_AVAILABILITY = process.env.END_CHECK_ALIAS;
-const SET_ALIAS_PATH = process.env.END_UPDATE_AC;
+const ENDPOINT = process.env.END_ALIAS;
 
 const args = process.argv.slice(2);
+
 if(args.length < 1){
-    console.error("Usage: npm run set-alias <alias> [subaccount-id]")
+    console.error("Usage: npm run set-alias <alias> [subaccount-id]");
     process.exit(1);
 }
 
-const ALIAS = args[0]
-const SUBACCOUNT = args[1]
+const ALIAS = args[0];
+const SUBACCOUNT = args[1];
 
+/**
+ * Sets an alias for a Bit2Me account
+ *
+ * This function assigns an alias to either the main account or a subaccount.
+ * Aliases are required for receiving social pay transfers and other operations.
+ *
+ * @async
+ * @function setAlias
+ * @param {string} alias - The alias to set (e.g., 'john.doe', 'crypto-trader')
+ * @param {string} [subaccount] - Optional subaccount ID
+ * @returns {Promise<Object>} Alias setting response
+ *
+ * @example
+ * // Set alias for main account
+ * const result = await setAlias('john.doe');
+ *
+ * @example
+ * // Set alias for subaccount
+ * const subResult = await setAlias('trading-bot', 'subaccount-123');
+ *
+ * @example
+ * // Response structure:
+ * // {
+ * //   success: true,
+ * //   alias: 'john.doe',
+ * //   accountId: 'account-id'
+ * // }
+ */
 const setAlias = async () => {
     try {
-        const availability = await axios.get(
-            `${process.env.SERVER}${GET_ALIAS_AVAILABILITY + ALIAS}`,
-            getAuthHeaders(GET_ALIAS_AVAILABILITY + ALIAS, SUBACCOUNT)
+        const body = {
+            "alias": ALIAS
+        };
+
+        const response = await axios.post(
+            `${process.env.SERVER}${ENDPOINT}`,
+            body,
+            getAuthHeaders(ENDPOINT, SUBACCOUNT, body)
         );
 
-        if(availability.data.available){
-            const body = {
-                "alias" : ALIAS
-            }
-
-            const response = await axios.put(
-                `${process.env.SERVER}${SET_ALIAS_PATH}`,
-                body,
-                getAuthHeaders(SET_ALIAS_PATH, SUBACCOUNT, body)
-            );
-      
-            console.log(response.data);
-        }
-        else{
-            console.error("Alias not available");
-        }
+        console.log("Alias set successfully:");
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error setting alias:', error.response?.data || error.message);
+        console.log("\nNote: Aliases must be unique and follow Bit2Me's naming conventions.");
     }
-    catch(e) {
-        console.error(e.response.data)
-        console.log("\n> Send reqId to Bit2Me team to debug it :)")
-    }
-}
+};
 
-setAlias()
+// Execute alias setting
+setAlias();

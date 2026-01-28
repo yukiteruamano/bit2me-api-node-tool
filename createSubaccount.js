@@ -1,39 +1,56 @@
 /**
+ * Bit2Me Subaccount Creation Module
+ *
+ * This script creates new subaccounts within the Bit2Me platform.
+ * Subaccounts allow users to manage multiple accounts under one main account.
+ *
+ * @module createSubaccount
  * @author Bit2Me
- * @dev Create a subaccount in Bit2Me
  */
-const axios  = require('axios');
-
-// Bit2me logic
+const axios = require('axios');
 const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-const PATH = process.env.END_SUBACCOUNT;
+const ENDPOINT = process.env.END_CREATE_SUBACCOUNT;
 
-//! Change this to create your subaccount
-const body = {
-  "email" : "",
-  "name" : "",
-  "surname" : "",
-  "phone" : {
-    "number" : "000000000",
-    "countryCode" : "34"
-  }
-}
-
+/**
+ * Creates a new subaccount
+ *
+ * This function sends a request to the Bit2Me API to create a subaccount
+ * with the specified configuration.
+ *
+ * @async
+ * @function createSubaccount
+ * @returns {Promise<Object>} Subaccount creation response containing userId
+ *
+ * @example
+ * // Response example: { userId: 'subaccount-id' }
+ */
 const createSubaccount = async () => {
-  try {
-    const response = await axios.post(
-      `${process.env.SERVER}${PATH}`,
-      body,
-      getAuthHeaders(PATH, "", body)
-    );
+    // Configuration for the new subaccount
+    const body = {
+        "alias": "subaccount-alias",
+        "name": "Subaccount Name",
+        "surname": "Subaccount Surname",
+        "email": "subaccount@example.com",
+        "phone": "+34123456789",
+        "country": "ES",
+        "language": "es"
+    };
 
-    console.log(response.data);
-  }
-  catch(e) {
-    console.error(e.response.data)
-    console.log("\n> Send reqId to Bit2Me team to debug it :)")
-  }
-}
+    try {
+        const response = await axios.post(
+            `${process.env.SERVER}${ENDPOINT}`,
+            body,
+            getAuthHeaders(ENDPOINT)
+        );
 
-createSubaccount()
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating subaccount:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+// Execute subaccount creation
+createSubaccount();

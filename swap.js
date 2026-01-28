@@ -1,4 +1,10 @@
 /**
+ * Bit2Me Crypto Swap Module
+ *
+ * This script allows users to swap one cryptocurrency for another.
+ * The process involves direct crypto-to-crypto conversion.
+ *
+ * @module swap
  * @author Bit2Me
  * @dev Swap crypto in Bit2Me
  */
@@ -24,6 +30,12 @@ const ORIGIN = args[1];
 const DESTINATION = args[2];
 const SUBACCOUNT = args[3];
 
+/**
+ * Retrieves the source and destination pockets for the swap operation
+ *
+ * @returns {Promise<Array>} Array containing [originPocketId, destinationPocketId]
+ * @throws {Error} If required pockets don't exist
+ */
 const retrievePockets = async () => {
     const originPockets = await getPocket(ORIGIN, SUBACCOUNT);
     const destinationPockets = await getPocket(DESTINATION, SUBACCOUNT);
@@ -41,10 +53,22 @@ const retrievePockets = async () => {
     return [originPockets[0].id, destinationPockets[0].id]
 }
 
-
+/**
+ * Executes a cryptocurrency swap
+ *
+ * This function handles the complete swap process:
+ * 1. Retrieves source and destination pockets
+ * 2. Creates a proforma order
+ * 3. Executes the swap
+ * 4. Returns transaction details
+ *
+ * @async
+ * @function swap
+ */
 const swap = async () => {
     const [origin, destination] = await retrievePockets();
 
+    // Build proforma request body for swapping crypto
     let proformaBody = {
         "pocket": origin,
         "destination": {
@@ -55,6 +79,7 @@ const swap = async () => {
     };
 
     try{
+        // Step 1: Create proforma order
         const proformaResponse = await axios.post(
             `${process.env.SERVER}${PROFORMA_PATH}`,
             proformaBody,
@@ -67,6 +92,7 @@ const swap = async () => {
                 "proforma": orderId
             }
 
+            // Step 2: Execute the swap
             const response = await axios.post(
                 `${process.env.SERVER}${EXECUTE_PROFORMA_PATH}`,
                 execBody,
@@ -74,6 +100,7 @@ const swap = async () => {
             );
 
             if (response.data) {
+                // Step 3: Display transaction details
                 console.log(await getTx(response.data.id, SUBACCOUNT))
             }
         }
@@ -83,4 +110,5 @@ const swap = async () => {
     }
 }
 
+// Execute the swap operation
 swap()

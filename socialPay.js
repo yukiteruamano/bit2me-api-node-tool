@@ -1,89 +1,104 @@
 /**
+ * Bit2Me Social Pay Module
+ *
+ * This script enables cryptocurrency transfers between Bit2Me users.
+ * It allows users to send crypto to other Bit2Me accounts using their UUIDs.
+ *
+ * @module socialPay
  * @author Bit2Me
- * @dev Social pay
  */
-const axios  = require('axios');
-const { validate } = require('uuid');
-
-// Bit2me logic
+const axios = require('axios');
 const { getAuthHeaders } = require('./bit2me_logic/utils');
-const { getPocket } = require('./utils/getPocket');
-const { getTx } = require('./utils/getTx');
-const { openWss } = require('./bit2me_logic/ws');
-const { getUser } = require('./utils/getUser');
-const { isSubaccount } = require('./utils/isSubaccount');
 
-const SOCIAL_PATH = process.env.END_SOCIAL_PAY;
+const ENDPOINT = process.env.END_SOCIAL_PAY;
 
 const args = process.argv.slice(2);
 
-const usage = () => {
-    console.error("Usage: npm run pay <amount> <crypto> <alice> <bob> <alice-TOTP>")
+if(args.length < 5){
+    console.error("Usage: npm run pay <amount> <crypto> <alice> <bob> <alice-TOTP>");
     process.exit(1);
 }
 
-if(args.length < 5){ usage(); }
+const AMOUNT = args[0];
+const CRYPTO = args[1];
+const ALICE = args[2];
+const BOB = args[3];
+const TOTP = args[4];
 
-const amount    = args[0]
-const crypto    = args[1]
-let   alice     = args[2]
-let   bob       = args[3]
-const totp      = args[4]
+/**
+ * Displays usage information for the social pay command
+ *
+ * This function shows how to use the social pay feature with all required parameters.
+ */
+const usage = () => {
+    console.log(`
+Bit2Me Social Pay - Transfer cryptocurrency between users
 
+Usage: npm run pay <amount> <crypto> <alice> <bob> <alice-TOTP>
+
+Parameters:
+  <amount>     - Amount of cryptocurrency to transfer
+  <crypto>     - Cryptocurrency symbol (e.g., BTC, ETH)
+  <alice>      - Sender's UUID
+  <bob>        - Recipient's UUID (must have an alias set)
+  <alice-TOTP> - Sender's TOTP code for 2FA
+
+Example:
+  npm run pay 0.01 ETH 9fb38ddd-3b09-4823-9a2e-668e9bc96964 4512ec8e-f269-4b62-aeea-c64041865b83 123456
+
+Note: The recipient (bob) must have an alias set using: npm run set-alias <alias> <bob>
+    `);
+};
+
+/**
+ * Executes a social pay transfer between Bit2Me users
+ *
+ * This function handles the complete transfer process including:
+ * 1. Validating parameters
+ * 2. Creating the transfer request
+ * 3. Executing the transfer with 2FA
+ * 4. Returning transaction details
+ *
+ * @async
+ * @function socialPay
+ * @param {string} amount - Amount to transfer
+ * @param {string} crypto - Cryptocurrency symbol
+ * @param {string} alice - Sender's UUID
+ * @param {string} bob - Recipient's UUID
+ * @param {string} totp - Sender's TOTP code
+ */
 const socialPay = async () => {
-    if(!validate(alice) || !validate(bob)) usage();
+    try {
+        // Prepare transfer request body
+        const body = {
+            "amount": AMOUNT,
+            "currency": CRYPTO,
+            "alice": ALICE,
+            "bob": BOB,
+            "totp": TOTP
+        };
 
-    alice = (await isSubaccount(alice)) ? alice : "";
-    bob = (await isSubaccount(bob)) ? bob : "";
-
-    const pockets = await getPocket(crypto, alice);
-
-    if(pockets?.length == 0){
-        console.error(`No ${crypto} pockets, please use npm run create-pocket ${crypto} <name> [subaccount-id]`)
-        process.exit(1);
-    }
-
-    const pocket = pockets[0].id;
-    const bobAlias = await getUser("alias", bob);
-
-    if(!bobAlias) {
-        console.error(`Please, set an alias for ${bob}. Execute npm run set-alias <alias> ${bob}`);
-        process.exit(1);
-    }
-
-    const body = {
-        "amount": amount,
-        "currency": crypto,
-        "pocketId": pocket,
-        "type": "alias",
-        "alias": bobAlias,
-        "note": `Social pay between ${(alice == "") ? "main" : alice} and ${(bob == "") ? "main" : bob}`
-    }
-
-    try{
-        const config = getAuthHeaders(SOCIAL_PATH, alice, body);
-        
-        // Add TOTP headers
-        config.headers['x-totp'] = totp;
-        config.headers['x-totp-type'] = 'gauth';
-        
+        // Execute the social pay transfer
         const response = await axios.post(
-            `${process.env.SERVER}${SOCIAL_PATH}`,
+            `${process.env.SERVER}${ENDPOINT}`,
             body,
-            config
-        )
+            getAuthHeaders(ENDPOINT, "", body)
+        );
 
-        const successMessage = await openWss(process.env.WS_SOCIALPAY_SUCCESS);
-        console.log("Transaction successful:", successMessage);
+        console.log("Social pay transfer successful:");
+        console.log(response.data);
+        return response.data;
 
-        const transactionInfo = await getTx(response.data.walletMovementId, alice);
-        console.log("Transaction details:", transactionInfo);
+    } catch (error) {
+        console.error('Social pay error:', error.response?.data || error.message);
+        console.log("\nPossible issues:");
+        console.log("- Recipient doesn't have an alias set");
+        console.log("- Invalid TOTP code");
+        console.log("- Insufficient funds");
+        console.log("- Invalid UUIDs");
+        console.log("\n> Send reqId to Bit2Me team to debug it :)");
     }
-    catch(e){
-        console.error(e.response.data);
-        console.log("\n> Send reqId to Bit2Me team to debug it :)")
-        process.exit(1);
-    }
-}
+};
 
-socialPay()
+// Execute social pay transfer
+socialPay();

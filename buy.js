@@ -1,4 +1,10 @@
 /**
+ * Bit2Me Crypto Purchase Module
+ *
+ * This script allows users to buy cryptocurrency using their EUR balance
+ * or by specifying the amount in the target cryptocurrency.
+ *
+ * @module buy
  * @author Bit2Me
  * @dev Buy crypto in Bit2Me with your EUR balance
  */
@@ -24,6 +30,12 @@ const AMOUNT = args[0];
 const CURRENCY = args[2];
 const SUBACCOUNT = args[3];
 
+/**
+ * Retrieves the source and destination pockets for the buy operation
+ *
+ * @returns {Promise<Array>} Array containing [fiatPocketId, cryptoPocketId]
+ * @throws {Error} If required pockets don't exist
+ */
 const retrievePockets = async () => {
     const cryptoPockets = await getPocket(CURRENCY, SUBACCOUNT);
     const fiatPockets = await getPocket(FIATCURRENCY, SUBACCOUNT);
@@ -41,23 +53,37 @@ const retrievePockets = async () => {
     return [fiatPockets[0].id, cryptoPockets[0].id]
 }
 
-
+/**
+ * Executes a cryptocurrency purchase
+ *
+ * This function handles the complete buy process:
+ * 1. Retrieves source and destination pockets
+ * 2. Creates a proforma order
+ * 3. Executes the order
+ * 4. Returns transaction details
+ *
+ * @async
+ * @function buy
+ */
 const buy = async () => {
+    // Determine if buying with fiat amount or crypto amount
     const withFiat = (args[1] == "-");
 
     const [origin, destination] = await retrievePockets();
 
+    // Build proforma request body
     let proformaBody = {
         "pocket": origin,
         "destination": {
             "pocket": destination,
         },
         "amount": AMOUNT,
-        "type": (withFiat) ? "REA" : "SEA",
+        "type": (withFiat) ? "REA" : "SEA", // REA = crypto amount, SEA = fiat amount
         "currency": (withFiat) ? CURRENCY : FIATCURRENCY
     };
 
     try{
+        // Step 1: Create proforma order
         const proformaResponse = await axios.post(
             `${process.env.SERVER}${PROFORMA_PATH}`,
             proformaBody,
@@ -70,6 +96,7 @@ const buy = async () => {
                 "proforma": orderId
             }
 
+            // Step 2: Execute the order
             const response = await axios.post(
                 `${process.env.SERVER}${EXECUTE_PROFORMA_PATH}`,
                 execBody,
@@ -77,6 +104,7 @@ const buy = async () => {
             );
 
             if (response.data) {
+                // Step 3: Display transaction details
                 console.log(await getTx(response.data.id, SUBACCOUNT))
             }
         }
@@ -86,4 +114,5 @@ const buy = async () => {
     }
 }
 
+// Execute the buy operation
 buy()

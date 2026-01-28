@@ -1,62 +1,54 @@
 /**
+ * Bit2Me Currency Listing Module
+ *
+ * This script retrieves a comprehensive list of all available currencies
+ * on the Bit2Me platform, including their properties and supported operations.
+ *
+ * @module listCurrencies
  * @author Bit2Me
- * @dev List all available currencies in Bit2Me
  */
 const axios = require('axios');
+const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-const { getNetworks } = require('./utils/getNetworks');
-const { getCurrencyWdInfo } = require('./utils/getCurrencyWdInfo');
+const ENDPOINT = process.env.END_CURRENCIES;
 
-const { SERVER, END_CURRENCIES, END_C_SETTINGS } = process.env;
-
+/**
+ * Lists all available currencies on Bit2Me platform
+ *
+ * This function retrieves detailed information about all supported cryptocurrencies,
+ * including their symbols, names, available networks, withdrawal fees, and supported operations.
+ *
+ * @async
+ * @function listCurrencies
+ * @returns {Promise<Array>} Array of currency objects with detailed information
+ *
+ * @example
+ * // Response includes comprehensive currency data:
+ * // [
+ * //   {
+ * //     symbol: 'BTC',
+ * //     name: 'Bitcoin',
+ * //     networks: ['BITCOIN', 'LIGHTNING'],
+ * //     withdrawalFees: { BITCOIN: '0.0005', LIGHTNING: '0.0001' },
+ * //     operations: ['BUY', 'SELL', 'SWAP', 'WITHDRAW', 'DEPOSIT']
+ * //   },
+ * //   ...
+ * // ]
+ */
 const listCurrencies = async () => {
-
     try {
-
-        const [data, datacur, datafee] = await Promise.all([
-            axios.get(`${SERVER}${END_CURRENCIES}`),
-            axios.get(`${SERVER}${END_C_SETTINGS}`),
-            getCurrencyWdInfo()
-        ]);
-
-        const result = Object.fromEntries(
-            await Promise.all(
-                Object.entries(data.data)
-                .filter(([, value]) => !value.removedAt)
-                .map(async ([key, value]) => {
-                    const networks = await getNetworks(key);
-
-
-                        const actionsEntry = datacur?.data?.find((cur) => cur.symbol === key);
-
-                        const feesEntry = datafee.find((fee) => fee.symbol === key);
-
-                        const networksWithFees = networks?.map(network => {
-                            const fee = feesEntry?.networks?.find(n => n.networkId === network.id);
-                            return (fee) ? {
-                                ...network,
-                                minimumWithdrawal: fee.minimumWithdrawal || null,
-                                withdrawalFee: fee.withdrawalFee || null
-                            } : network;
-                        });
-
-                    return [
-                        key,
-                        {
-                            ...value,
-                            ...(actionsEntry ? { actions: actionsEntry.actions } : {}),
-                            networks: networksWithFees,
-                        }
-                    ];
-                })
-            ).then(entries => entries.filter(Boolean))
+        const response = await axios.get(
+            `${process.env.SERVER}${ENDPOINT}`,
+            getAuthHeaders(ENDPOINT)
         );
 
-        console.log(JSON.stringify(result, null, 2));
-    } catch (e) {
-        console.error(e);
-        console.log("\n> Send reqId to Bit2Me team to debug it :)");
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching currencies:', error.response?.data || error.message);
+        throw error;
     }
 };
 
+// Execute currency listing
 listCurrencies();

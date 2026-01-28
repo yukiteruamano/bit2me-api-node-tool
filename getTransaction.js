@@ -1,17 +1,50 @@
 /**
+ * Bit2Me Transaction Retrieval Module
+ *
+ * This script retrieves detailed information about specific transactions.
+ * Users can get comprehensive data about their transaction history.
+ *
+ * @module getTransaction
  * @author Bit2Me
- * @dev Get an specific transaction in Bit2Me
  */
+const axios = require('axios');
+const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-// Bit2me logic
-const { getTx } = require('./utils/getTx')
+const ENDPOINT = process.env.END_TX;
 
 const args = process.argv.slice(2);
 
-const SUBACCOUNT = args[1]
-
-const getTransaction= async () => {
-    (SUBACCOUNT) ? console.log(await getTx(args[0], SUBACCOUNT)) : console.log(await getTx(args[0]))
+if(args.length < 1){
+    console.error("Usage: npm run read-tx <tx-id> [subaccount-id]");
+    process.exit(1);
 }
 
-getTransaction()
+const TX_ID = args[0];
+const SUBACCOUNT = args[1];
+
+/**
+ * Retrieves detailed information about a specific transaction
+ *
+ * This function fetches comprehensive transaction data including
+ * status, amounts, fees, timestamps, and other metadata.
+ *
+ * @async
+ * @function getTransaction
+ * @param {string} txId - Transaction ID to retrieve
+ * @param {string} [subaccount] - Optional subaccount ID
+ */
+const getTransaction = async () => {
+    try {
+        const response = await axios.get(
+            `${process.env.SERVER}${ENDPOINT}/${TX_ID}`,
+            getAuthHeaders(`${ENDPOINT}/${TX_ID}`, SUBACCOUNT)
+        );
+
+        console.log(response.data);
+    } catch (error) {
+        console.error('Error fetching transaction:', error.response?.data || error.message);
+    }
+};
+
+// Execute transaction retrieval
+getTransaction();

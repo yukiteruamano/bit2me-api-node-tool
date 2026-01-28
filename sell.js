@@ -1,4 +1,10 @@
 /**
+ * Bit2Me Crypto Sales Module
+ *
+ * This script allows users to sell cryptocurrency for EUR.
+ * The process involves converting crypto assets to fiat currency.
+ *
+ * @module sell
  * @author Bit2Me
  * @dev Sell crypto in Bit2Me
  */
@@ -24,6 +30,12 @@ const AMOUNT = args[0];
 const CRYPTO = args[1];
 const SUBACCOUNT = args[2];
 
+/**
+ * Retrieves the source (crypto) and destination (EUR) pockets for the sell operation
+ *
+ * @returns {Promise<Array>} Array containing [cryptoPocketId, fiatPocketId]
+ * @throws {Error} If required pockets don't exist
+ */
 const retrievePockets = async () => {
     const cryptoPockets = await getPocket(CRYPTO, SUBACCOUNT);
     const fiatPockets = await getPocket(FIATCURRENCY, SUBACCOUNT);
@@ -41,10 +53,22 @@ const retrievePockets = async () => {
     return [cryptoPockets[0].id, fiatPockets[0].id]
 }
 
-
+/**
+ * Executes a cryptocurrency sale
+ *
+ * This function handles the complete sell process:
+ * 1. Retrieves source (crypto) and destination (EUR) pockets
+ * 2. Creates a proforma order
+ * 3. Executes the order
+ * 4. Returns transaction details
+ *
+ * @async
+ * @function sell
+ */
 const sell = async () => {
     const [origin, destination] = await retrievePockets();
 
+    // Build proforma request body for selling crypto
     let proformaBody = {
         "pocket": origin,
         "destination": {
@@ -55,6 +79,7 @@ const sell = async () => {
     };
 
     try{
+        // Step 1: Create proforma order
         const proformaResponse = await axios.post(
             `${process.env.SERVER}${PROFORMA_PATH}`,
             proformaBody,
@@ -67,6 +92,7 @@ const sell = async () => {
                 "proforma": orderId
             }
 
+            // Step 2: Execute the order
             const response = await axios.post(
                 `${process.env.SERVER}${EXECUTE_PROFORMA_PATH}`,
                 execBody,
@@ -74,6 +100,7 @@ const sell = async () => {
             );
 
             if (response.data) {
+                // Step 3: Display transaction details
                 console.log(await getTx(response.data.id, SUBACCOUNT))
             }
         }
@@ -83,4 +110,5 @@ const sell = async () => {
     }
 }
 
+// Execute the sell operation
 sell()
