@@ -69,6 +69,14 @@ This is a Node.js command-line tool for interacting with the Bit2Me cryptocurren
 - **Parameters**:
   - `subaccount`: Subaccount ID (optional)
 
+#### `accountDetails.js` - `getAccountDetails()`
+- **Purpose**: Retrieves account details for the authenticated user
+- **Returns**: detailed account object including profile info
+
+#### `checkIdentityStatus.js` - `checkIdentityStatus()`
+- **Purpose**: Retrieves identity verification status
+- **Returns**: Status object indicating verification level and requirements
+
 ### Wallet/Pocket Management
 
 #### `createPocket.js` - `createPocket(currency, name, subaccount)`
@@ -130,6 +138,19 @@ This is a Node.js command-line tool for interacting with the Bit2Me cryptocurren
   2. Creates proforma order
   3. Executes the swap
   4. Returns transaction details
+
+#### `createOrder.js` - `createOrder(amount, currency, subaccount)`
+- **Purpose**: Creates an order via Teller API
+- **Parameters**:
+  - `amount`: Amount for the order
+  - `currency`: Currency symbol
+  - `subaccount`: Subaccount ID (optional)
+- **Process**: Uses Proforma -> Execute pattern
+
+#### `listOrders.js` - `listOrders(subaccount)`
+- **Purpose**: Lists pending orders
+- **Parameters**:
+  - `subaccount`: Subaccount ID (optional)
 
 ### Deposit Operations
 
@@ -210,6 +231,28 @@ This is a Node.js command-line tool for interacting with the Bit2Me cryptocurren
 - **Purpose**: Generates JWT token for authentication
 - **Parameters**:
   - `subaccount`: Subaccount ID (optional)
+
+### Earn Operations
+
+#### `showEarnSummary.js` - `showEarnSummary()`
+- **Purpose**: Retrieves Earn program summary for the user
+- **Returns**: Summary of earn assets and total value
+
+#### `listEarnWallets.js` - `listEarnWallets()`
+- **Purpose**: Lists all Earn wallets
+- **Returns**: Array of earn wallets with APY and balance
+
+### Market Data
+
+#### `getMarketData.js` - `getMarketData(market)`
+- **Purpose**: Retrieves configuration data for a specific market
+- **Parameters**:
+  - `market`: Market pair (e.g. BTC/EUR)
+
+#### `getTickerInfo.js` - `getTickerInfo(market)`
+- **Purpose**: Retrieves ticker information (price, volume, etc.)
+- **Parameters**:
+  - `market`: Market pair (e.g. BTC/EUR)
 
 ### Social Payments
 
