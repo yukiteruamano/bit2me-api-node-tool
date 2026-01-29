@@ -37,8 +37,13 @@ const getAccountDetails = async () => {
     catch(e) {
         console.error(e.response ? e.response.data : e.message);
         console.log("\n> Send reqId to Bit2Me team to debug it :)");
+        throw e;
     }
 }
 
-// Execute account details retrieval
-getAccountDetails();
+// Execute account details retrieval if run directly
+if (require.main === module) {
+    getAccountDetails();
+}
+
+module.exports = { getAccountDetails };

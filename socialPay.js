@@ -100,5 +100,9 @@ const socialPay = async () => {
     }
 };
 
-// Execute social pay transfer
-socialPay();
+// Execute socialPay if run directly
+if (require.main === module) {
+    socialPay();
+}
+
+module.exports = { socialPay };

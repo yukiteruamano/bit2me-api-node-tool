@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bit2Me Crypto API - Example</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Bit2Me Crypto API - Example</h1>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchView('ticker')">Ticker Info</button>
+            <button class="nav-btn" onclick="switchView('account')">Account Details</button>
+        </div>
+
+        <div class="loader" id="loader">Loading...</div>
+        <div class="error" id="errorMsg"></div>
+
+        <!-- TICKER VIEW -->
+        <div id="tickerView" class="view-section active">
+            <div class="search-box">
+                <input type="text" id="marketInput" placeholder="e.g. BTC/EUR" value="BTC/EUR">
+                <button onclick="fetchTicker()">Get Info</button>
+            </div>
+
+            <div id="result" class="ticker-card" style="display: none;">
+                <div class="header">
+                    <div class="symbol" id="symbolDisplay">BTC/EUR</div>
+                    <div class="price-large" id="lastPrice">45,000.00 €</div>
+                </div>
+
+                <div class="grid">
+                    <div class="stat-item">
+                        <span class="label">Ask (Buy Price)</span>
+                        <span class="value" id="askPrice">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bid (Sell Price)</span>
+                        <span class="value" id="bidPrice">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">24h High</span>
+                        <span class="value" id="highPrice">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">24h Low</span>
+                        <span class="value" id="lowPrice">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Volume (24h)</span>
+                        <span class="value" id="volume">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Timestamp</span>
+                        <span class="value" id="timestamp">-</span>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+
+        <!-- ACCOUNT VIEW -->
+        <div id="accountView" class="view-section">
+            <div id="accountResult" class="account-card" style="display: none;">
+                <div class="header">
+                    <div class="symbol">My Account</div>
+                    <div class="price-large" id="kycStatus">Level 0</div>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">User ID</span>
+                    <span class="info-value" id="userId">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="userEmail">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-value" id="userName">-</span>
+                </div>
+                 <div class="info-row">
+                    <span class="info-label">Surname</span>
+                    <span class="info-value" id="userSurname">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value" id="userPhone">-</span>
+                </div>
+                 <div class="info-row">
+                    <span class="info-label">Default Currency</span>
+                    <span class="info-value" id="userCurrency">-</span>
+                </div>
+                 <div class="info-row">
+                    <span class="info-label">Portfolio Value</span>
+                    <span class="info-value" id="portfolioValue">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">2FA Status</span>
+                    <span class="info-value" id="twoFactorStatus">-</span>
+                </div>
+                <!-- Identity Section -->
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 10px;">IDENTITY & VERIFICATION</div>
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value" id="identityStatus">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Risk Level</span>
+                        <span class="info-value" id="riskLevel">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Verification Tier</span>
+                        <span class="info-value" id="verificationTier">-</span>
+                    </div>
+                </div>
+                <!-- Subaccounts Section -->
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 10px;">SUBACCOUNTS</div>
+                    <div id="subaccountsList" style="font-size: 14px; color: var(--text-primary);">
+                        No subaccounts found
+                    </div>
+                </div>
+            </div>
+             <div class="action-btn-container">
+                <button class="refresh-btn" onclick="fetchAccount()">Refresh Account Data</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -79,5 +79,9 @@ const setTOTP = async () => {
     }
 };
 
-// Execute TOTP configuration
-setTOTP();
+// Execute setTOTP if run directly
+if (require.main === module) {
+    setTOTP();
+}
+
+module.exports = { setTOTP };

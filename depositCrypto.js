@@ -51,5 +51,9 @@ const depositCrypto = async () => {
     }
 };
 
-// Execute deposit address generation
-depositCrypto();
+// Execute depositCrypto if run directly
+if (require.main === module) {
+    depositCrypto();
+}
+
+module.exports = { depositCrypto };

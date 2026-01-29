@@ -78,5 +78,9 @@ const withdrawEUR = async () => {
     }
 };
 
-// Execute EUR withdrawal
-withdrawEUR();
+// Execute withdrawEUR if run directly
+if (require.main === module) {
+    withdrawEUR();
+}
+
+module.exports = { withdrawEUR };

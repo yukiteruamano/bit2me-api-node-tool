@@ -73,5 +73,9 @@ const depositEUR = async () => {
     }
 }
 
-// Execute EUR deposit process
-depositEUR();
+// Execute depositEUR if run directly
+if (require.main === module) {
+    depositEUR();
+}
+
+module.exports = { depositEUR };

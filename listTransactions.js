@@ -62,5 +62,9 @@ const listTransactions = async () => {
     }
 };
 
-// Execute transaction listing
-listTransactions();
+// Execute listTransactions if run directly
+if (require.main === module) {
+    listTransactions();
+}
+
+module.exports = { listTransactions };

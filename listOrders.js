@@ -58,5 +58,9 @@ const listOrders = async () => {
     }
 }
 
-// Execute list orders
-listOrders();
+// Execute listOrders if run directly
+if (require.main === module) {
+    listOrders();
+}
+
+module.exports = { listOrders };

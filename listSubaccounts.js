@@ -10,7 +10,7 @@
 const axios = require('axios');
 const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-const ENDPOINT = process.env.END_SUBACCOUNTS;
+const ENDPOINT = process.env.END_SUBACCOUNT || "/v1/account/subaccount";
 
 /**
  * Lists all subaccounts for the main account
@@ -48,25 +48,29 @@ const listSubaccounts = async () => {
             getAuthHeaders(ENDPOINT)
         );
 
-        const subaccounts = response.data;
+        const subaccounts = response.data.data || [];
 
         console.log("Subaccounts List:");
         console.log(`Total: ${subaccounts.length} subaccounts`);
 
         subaccounts.forEach((subaccount, index) => {
-            console.log(`\n${index + 1}. ${subaccount.name || subaccount.alias || subaccount.id}`);
+            console.log(`\n${index + 1}. ${subaccount.alias || subaccount.name || subaccount.id}`);
             console.log(`   ID: ${subaccount.id}`);
-            console.log(`   Alias: ${subaccount.alias || 'Not set'}`);
-            console.log(`   Email: ${subaccount.email}`);
-            console.log(`   Status: ${subaccount.status}`);
+            console.log(`   Email: ${subaccount.email || 'Not set'}`);
+            console.log(`   Status: ${subaccount.state === 1 ? 'ACTIVE' : 'INACTIVE'} (State: ${subaccount.state})`);
             console.log(`   Created: ${new Date(subaccount.createdAt).toLocaleString()}`);
         });
 
         return subaccounts;
     } catch (error) {
         console.error('Error listing subaccounts:', error.response?.data || error.message);
+        throw error;
     }
 };
 
-// Execute subaccount listing
-listSubaccounts();
+// Execute subaccount listing if run directly
+if (require.main === module) {
+    listSubaccounts();
+}
+
+module.exports = { listSubaccounts };

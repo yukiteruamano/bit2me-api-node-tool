@@ -44,5 +44,9 @@ const marketData = async () => {
     }
 };
 
-// Execute market data retrieval
-marketData();
+// Execute marketData if run directly
+if (require.main === module) {
+    marketData();
+}
+
+module.exports = { marketData };

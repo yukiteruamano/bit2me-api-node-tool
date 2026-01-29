@@ -46,5 +46,9 @@ const getTransaction = async () => {
     }
 };
 
-// Execute transaction retrieval
-getTransaction();
+// Execute getTransaction if run directly
+if (require.main === module) {
+    getTransaction();
+}
+
+module.exports = { getTransaction };

@@ -71,5 +71,9 @@ const setAlias = async () => {
     }
 };
 
-// Execute alias setting
-setAlias();
+// Execute setAlias if run directly
+if (require.main === module) {
+    setAlias();
+}
+
+module.exports = { setAlias };

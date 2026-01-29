@@ -95,5 +95,9 @@ const withdrawCrypto = async () => {
     }
 };
 
-// Execute cryptocurrency withdrawal
-withdrawCrypto();
+// Execute withdrawCrypto if run directly
+if (require.main === module) {
+    withdrawCrypto();
+}
+
+module.exports = { withdrawCrypto };

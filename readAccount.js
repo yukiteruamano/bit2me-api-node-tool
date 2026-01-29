@@ -65,5 +65,9 @@ const readAccount = async () => {
     }
 };
 
-// Execute account information retrieval
-readAccount();
+// Execute readAccount if run directly
+if (require.main === module) {
+    readAccount();
+}
+
+module.exports = { readAccount };

@@ -70,5 +70,8 @@ const createPocket = async () => {
     }
 }
 
-// Execute pocket creation
-createPocket();
+// Execute createPocket if run directly
+if (require.main === module) {
+    createPocket()}
+
+module.exports = { createPocket };

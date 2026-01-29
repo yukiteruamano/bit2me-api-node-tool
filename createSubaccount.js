@@ -52,5 +52,9 @@ const createSubaccount = async () => {
     }
 };
 
-// Execute subaccount creation
-createSubaccount();
+// Execute createSubaccount if run directly
+if (require.main === module) {
+    createSubaccount();
+}
+
+module.exports = { createSubaccount };

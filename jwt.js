@@ -63,5 +63,9 @@ const getJWT = async () => {
     }
 };
 
-// Execute JWT generation
-getJWT();
+// Execute getJWT if run directly
+if (require.main === module) {
+    getJWT();
+}
+
+module.exports = { getJWT };

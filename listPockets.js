@@ -69,5 +69,9 @@ const listPockets = async () => {
     }
 };
 
-// Execute pocket listing
-listPockets();
+// Execute listPockets if run directly
+if (require.main === module) {
+    listPockets();
+}
+
+module.exports = { listPockets };

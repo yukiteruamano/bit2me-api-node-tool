@@ -89,5 +89,9 @@ const getMarketData = async () => {
     }
 }
 
-// Execute market data retrieval
-getMarketData();
+// Execute getMarketData if run directly
+if (require.main === module) {
+    getMarketData();
+}
+
+module.exports = { getMarketData };

@@ -10,7 +10,7 @@
 const axios = require('axios');
 const { getAuthHeaders } = require('./bit2me_logic/utils');
 
-const ENDPOINT = process.env.END_MARKET_QUOTES;
+const ENDPOINT = process.env.END_QUOTES || "/v1/currency/prices";
 
 const args = process.argv.slice(2);
 const CURRENCY = args[0] || "EUR"; // Default to EUR if no currency specified
@@ -57,5 +57,9 @@ const marketQuotes = async () => {
     }
 };
 
-// Execute market quotes retrieval
-marketQuotes();
+// Execute marketQuotes if run directly
+if (require.main === module) {
+    marketQuotes();
+}
+
+module.exports = { marketQuotes };

@@ -23,7 +23,7 @@ const PATH = process.env.END_EARN_SUMMARY || "/v1/earn/summary";
  * @function showEarnSummary
  * @returns {Promise<Object>} Earn summary response
  */
-const showEarnSummary = async () => {
+const getEarnSummary = async () => {
     try {
         console.log("Fetching Earn Summary...");
         // Send earn summary request
@@ -39,8 +39,13 @@ const showEarnSummary = async () => {
     catch(e) {
         console.error(e.response ? e.response.data : e.message);
         console.log("\n> Send reqId to Bit2Me team to debug it :)");
+        throw e;
     }
 }
 
-// Execute earn summary retrieval
-showEarnSummary();
+// Execute earn summary if run directly
+if (require.main === module) {
+    getEarnSummary();
+}
+
+module.exports = { getEarnSummary };

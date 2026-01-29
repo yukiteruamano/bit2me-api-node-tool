@@ -50,5 +50,9 @@ const listCurrencies = async () => {
     }
 };
 
-// Execute currency listing
-listCurrencies();
+// Execute listCurrencies if run directly
+if (require.main === module) {
+    listCurrencies();
+}
+
+module.exports = { listCurrencies };

@@ -66,5 +66,9 @@ const pocketsBalance = async () => {
     }
 };
 
-// Execute balance retrieval
-pocketsBalance();
+// Execute pocketsBalance if run directly
+if (require.main === module) {
+    pocketsBalance();
+}
+
+module.exports = { pocketsBalance };

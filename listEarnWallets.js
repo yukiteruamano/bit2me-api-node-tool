@@ -55,5 +55,9 @@ const listEarnWallets = async () => {
     }
 }
 
-// Execute earn wallets retrieval
-listEarnWallets();
+// Execute listEarnWallets if run directly
+if (require.main === module) {
+    listEarnWallets();
+}
+
+module.exports = { listEarnWallets };

@@ -110,5 +110,9 @@ const sell = async () => {
     }
 }
 
-// Execute the sell operation
-sell()
+// Execute sell if run directly
+if (require.main === module) {
+    sell();
+}
+
+module.exports = { sell };

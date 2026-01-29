@@ -66,5 +66,9 @@ const getTOTP = async () => {
     }
 };
 
-// Execute TOTP retrieval
-getTOTP();
+// Execute getTOTP if run directly
+if (require.main === module) {
+    getTOTP();
+}
+
+module.exports = { getTOTP };

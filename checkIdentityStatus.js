@@ -38,8 +38,13 @@ const checkIdentityStatus = async () => {
     catch(e) {
         console.error(e.response ? e.response.data : e.message);
         console.log("\n> Send reqId to Bit2Me team to debug it :)");
+        throw e;
     }
 }
 
-// Execute identity status check
-checkIdentityStatus();
+// Execute identity status check if run directly
+if (require.main === module) {
+    checkIdentityStatus();
+}
+
+module.exports = { checkIdentityStatus };

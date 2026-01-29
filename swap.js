@@ -110,5 +110,9 @@ const swap = async () => {
     }
 }
 
-// Execute the swap operation
-swap()
+// Execute swap if run directly
+if (require.main === module) {
+    swap();
+}
+
+module.exports = { swap };

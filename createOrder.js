@@ -89,5 +89,10 @@ const createOrder = async () => {
     }
 }
 
-// Execute order creation
-createOrder();
+
+// Execute createOrder if run directly
+if (require.main === module) {
+    createOrder();
+}
+
+module.exports = { createOrder };

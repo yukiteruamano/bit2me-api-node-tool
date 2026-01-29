@@ -114,5 +114,9 @@ const buy = async () => {
     }
 }
 
-// Execute the buy operation
-buy()
+// Execute buy if run directly
+if (require.main === module) {
+    buy();
+}
+
+module.exports = { buy };

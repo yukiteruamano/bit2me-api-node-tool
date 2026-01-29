@@ -16,10 +16,7 @@ const PATH = process.env.END_TRADING_TICKERS || "/v2/trading/tickers";
 
 const args = process.argv.slice(2);
 
-if(args.length < 1){
-    console.error("Usage: npm run get-ticker-info <market> (e.g. BTC/EUR)");
-    process.exit(1);
-}
+// Args check moved to execution block
 
 const MARKET = args[0];
 
@@ -32,12 +29,20 @@ const MARKET = args[0];
  * @function getTickerInfo
  * @returns {Promise<Object>} Ticker info response
  */
-const getTickerInfo = async () => {
+const getTickerInfo = async (market) => {
+    // If market argument provided, use it, otherwise use global const from args
+    const targetMarket = market || MARKET;
+    
+    if (!targetMarket) {
+         console.error("No market specified.");
+         return null;
+    }
+
     try {
-        console.log(`Fetching Ticker Info for ${MARKET}...`);
+        console.log(`Fetching Ticker Info for ${targetMarket}...`);
         
         // Construct path with query parameter
-        const pathWithQuery = `${PATH}?symbol=${MARKET}`;
+        const pathWithQuery = `${PATH}?symbol=${targetMarket}`;
 
         // Send ticker info request
         const response = await axios.get(
@@ -55,8 +60,17 @@ const getTickerInfo = async () => {
     catch(e) {
         console.error(e.response ? e.response.data : e.message);
         console.log("\n> Send reqId to Bit2Me team to debug it :)");
+        throw e;
     }
 }
 
-// Execute ticker info retrieval
-getTickerInfo();
+// Execute ticker info retrieval if run directly
+if (require.main === module) {
+    if(args.length < 1){
+        console.error("Usage: npm run get-ticker-info <market> (e.g. BTC/EUR)");
+        process.exit(1);
+    }
+    getTickerInfo();
+}
+
+module.exports = { getTickerInfo };
