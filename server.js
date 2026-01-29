@@ -11,8 +11,51 @@ const { getAccountDetails } = require('./accountDetails.js');
 const { getEarnSummary } = require('./showEarnSummary.js');
 const { checkIdentityStatus } = require('./checkIdentityStatus.js');
 const { listSubaccounts } = require('./listSubaccounts.js');
+const { getMarketOverview } = require('./getMarketOverview.js');
+const http = require('http');
+const { Server } = require('ws');
 
 const PORT = 3000;
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Create WebSocket server
+const wss = new Server({ server });
+
+// Store connected clients
+const clients = new Set();
+
+wss.on('connection', (ws) => {
+    console.log('New WebSocket client connected');
+    clients.add(ws);
+    
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        clients.delete(ws);
+    });
+});
+
+// Broadcast helper
+function broadcast(data) {
+    const message = JSON.stringify(data);
+    clients.forEach(client => {
+        if (client.readyState === 1) { // OPEN
+            client.send(message);
+        }
+    });
+}
+
+// Background Task: Update market data every 60 seconds
+setInterval(async () => {
+    try {
+        console.log('Background update: Fetching market overview...');
+        const data = await getMarketOverview();
+        broadcast({ type: 'market-update', data });
+    } catch (e) {
+        console.error('Background update failed:', e.message);
+    }
+}, 60000); // 60 seconds
 
 // Serve static files from html-test directory
 app.use(express.static(path.join(__dirname, 'html-test')));
@@ -77,7 +120,19 @@ app.get('/api/subaccounts', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+// API Endpoint to get market overview
+app.get('/api/market/overview', async (req, res) => {
+    try {
+        console.log('API request for market overview');
+        const data = await getMarketOverview();
+        res.json(data);
+    } catch (error) {
+        console.error('Market overview error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch market overview' });
+    }
+});
+
+server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
     console.log(`Open http://localhost:${PORT}/tickerInfo.html in your browser`);
 });

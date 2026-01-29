@@ -1,11 +1,48 @@
 
+let socket;
+
+// Initialize WebSocket on page load
+window.onload = () => {
+    setupWebSocket();
+};
+
+function setupWebSocket() {
+    // Determine the WS protocol based on the current page protocol
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
+    
+    console.log(`Connecting to WebSocket: ${wsUrl}`);
+    socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+        console.log('WebSocket connected');
+    };
+
+    socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'market-update') {
+            console.log('Received market update via WebSocket');
+            renderMarket(msg.data);
+        }
+    };
+
+    socket.onclose = () => {
+        console.log('WebSocket disconnected. Retrying in 5s...');
+        setTimeout(setupWebSocket, 5000);
+    };
+
+    socket.onerror = (err) => {
+        console.error('WebSocket error:', err);
+    };
+}
+
 function switchView(viewName) {
     // Update buttons
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    // Note: using event.currentTarget to be safer than event.target when clicking button contents
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+    
+    // Find the button that was clicked or matching button
+    const activeBtn = event && event.currentTarget ? event.currentTarget : [...document.querySelectorAll('.nav-btn')].find(btn => btn.onclick.toString().includes(viewName));
+    if (activeBtn) activeBtn.classList.add('active');
 
     // Update views
     document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
@@ -14,10 +51,62 @@ function switchView(viewName) {
     // Hide messages
     document.getElementById('errorMsg').style.display = 'none';
 
-    // Auto-fetch if account view selected and no data yet
+    // Auto-fetch data if needed
     if (viewName === 'account' && document.getElementById('accountResult').style.display === 'none') {
         fetchAccount();
+    } else if (viewName === 'market') {
+        fetchMarketOverview();
     }
+}
+
+async function fetchMarketOverview() {
+    const loader = document.getElementById('loader');
+    const updateTag = document.getElementById('lastMarketUpdate');
+
+    loader.style.display = 'block';
+    updateTag.textContent = 'Updating...';
+
+    try {
+        const response = await fetch('/api/market/overview');
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.error || 'Failed to fetch market data');
+        
+        renderMarket(data);
+    } catch (err) {
+        console.error('Market fetch error:', err);
+        document.getElementById('errorMsg').textContent = `Market Error: ${err.message}`;
+        document.getElementById('errorMsg').style.display = 'block';
+    } finally {
+        loader.style.display = 'none';
+    }
+}
+
+function renderMarket(data) {
+    const body = document.getElementById('marketBody');
+    const updateTag = document.getElementById('lastMarketUpdate');
+    
+    if (!data || data.length === 0) {
+        body.innerHTML = '<tr><td colspan="5" style="text-align: center;">No market data available</td></tr>';
+        return;
+    }
+
+    body.innerHTML = '';
+    data.forEach(item => {
+        const candle = item.candle || {};
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td><span class="crypto-symbol">${item.symbol} / USDC</span></td>
+            <td class="price-cell">${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 3 })} €</td>
+            <td class="candle-val">${(candle.h || '-')}</td>
+            <td class="candle-val">${(candle.l || '-')}</td>
+            <td class="candle-val">${(candle.v || '-')}</td>
+        `;
+        body.appendChild(tr);
+    });
+
+    updateTag.textContent = `Last update: ${new Date().toLocaleTimeString()}`;
 }
 
 async function fetchAccount() {
@@ -83,22 +172,17 @@ async function fetchAccount() {
         }
         
         // Populate account data
-        // Correct mapping based on debug findings
-        
         document.getElementById('userId').textContent = data.id || '-';
         document.getElementById('userEmail').textContent = data.email || 'Hidden';
         
-        // 2FA Status
         const twoFactor = data.secondFactorAuth?.enabled ? 'Enabled' : 'Disabled';
         document.getElementById('twoFactorStatus').textContent = twoFactor;
         document.getElementById('twoFactorStatus').style.color = data.secondFactorAuth?.enabled ? 'var(--success-color)' : 'var(--danger-color)';
 
-        // Name and Surname are in 'person' object
         const person = data.person || {};
         document.getElementById('userName').textContent = person.name || '-';
         document.getElementById('userSurname').textContent = person.surname || '-';
         
-        // Phone is an object
         const phone = data.phone || {};
         if (phone.number) {
             document.getElementById('userPhone').textContent = `+${phone.countryCode || ''} ${phone.number}`;
@@ -106,15 +190,12 @@ async function fetchAccount() {
              document.getElementById('userPhone').textContent = typeof data.phone === 'string' ? data.phone : '-';
         }
 
-        // Currency is in profile
         const profile = data.profile || {};
         const currency = profile.currencyCode || data.currency || 'EUR';
         document.getElementById('userCurrency').textContent = currency.toUpperCase();
         
-         // Porfolio Value from Earn Summary
          document.getElementById('portfolioValue').textContent = portfolioValue;
          
-         // KYC Level
          if (data.kyc_level !== undefined) {
              document.getElementById('kycStatus').textContent = `Level ${data.kyc_level}`;
          } else {
@@ -150,12 +231,8 @@ async function fetchTicker() {
             throw new Error(data.error || 'Ticker not found');
         }
         
-        // Handle different response formats (Array vs Object map)
         let ticker = data;
-        
         if (Array.isArray(data)) {
-            // unexpected array from some endpoints or standard formatted list
-            // If it's an array, look for the matching symbol or just take the first one if it's the only one 
             const found = data.find(t => t.symbol === market || t.pair === market);
             ticker = found || data[0];
         } else if (data[market]) {

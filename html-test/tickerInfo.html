@@ -15,6 +15,7 @@
         <div class="nav-tabs">
             <button class="nav-btn active" onclick="switchView('ticker')">Ticker Info</button>
             <button class="nav-btn" onclick="switchView('account')">Account Details</button>
+            <button class="nav-btn" onclick="switchView('market')">Market</button>
         </div>
 
         <div class="loader" id="loader">Loading...</div>
@@ -129,6 +130,33 @@
             </div>
              <div class="action-btn-container">
                 <button class="refresh-btn" onclick="fetchAccount()">Refresh Account Data</button>
+            </div>
+        </div>
+
+        <!-- MARKET VIEW -->
+        <div id="marketView" class="view-section">
+            <div class="market-container">
+                <div class="market-header">
+                    <h2>Live Market Overview</h2>
+                    <span class="update-tag" id="lastMarketUpdate">Waiting for updates...</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Price (EUR)</th>
+                                <th>High (1h)</th>
+                                <th>Low (1h)</th>
+                                <th>Volume (1h)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marketBody">
+                            <!-- Data will be populated here -->
+                            <tr><td colspan="5" style="text-align: center; padding: 40px;">Loading market data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

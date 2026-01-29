@@ -245,3 +245,77 @@ button:hover {
     background-color: var(--accent-color);
     color: white;
 }
+
+/* Market View Styles */
+.market-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.market-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.market-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.update-tag {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    background: rgba(88, 166, 255, 0.1);
+    border-radius: 4px;
+    color: var(--text-secondary);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.market-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.market-table th, .market-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.market-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.market-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.crypto-symbol {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.price-cell {
+    font-family: monospace;
+    font-size: 1rem;
+    color: var(--success-color);
+}
+
+.candle-val {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
