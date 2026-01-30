@@ -10,7 +10,7 @@ function setupWebSocket() {
     // Determine the WS protocol based on the current page protocol
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}`;
-    
+
     console.log(`Connecting to WebSocket: ${wsUrl}`);
     socket = new WebSocket(wsUrl);
 
@@ -39,7 +39,7 @@ function setupWebSocket() {
 function switchView(viewName) {
     // Update buttons
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    
+
     // Find the button that was clicked or matching button
     const activeBtn = event && event.currentTarget ? event.currentTarget : [...document.querySelectorAll('.nav-btn')].find(btn => btn.onclick.toString().includes(viewName));
     if (activeBtn) activeBtn.classList.add('active');
@@ -69,9 +69,9 @@ async function fetchMarketOverview() {
     try {
         const response = await fetch('/api/market/overview');
         const data = await response.json();
-        
+
         if (!response.ok) throw new Error(data.error || 'Failed to fetch market data');
-        
+
         renderMarket(data);
     } catch (err) {
         console.error('Market fetch error:', err);
@@ -85,7 +85,7 @@ async function fetchMarketOverview() {
 function renderMarket(data) {
     const body = document.getElementById('marketBody');
     const updateTag = document.getElementById('lastMarketUpdate');
-    
+
     if (!data || data.length === 0) {
         body.innerHTML = '<tr><td colspan="5" style="text-align: center;">No market data available</td></tr>';
         return;
@@ -95,7 +95,7 @@ function renderMarket(data) {
     data.forEach(item => {
         const candle = item.candle || {};
         const tr = document.createElement('tr');
-        
+
         tr.innerHTML = `
             <td><span class="crypto-symbol">${item.symbol} / USDC</span></td>
             <td class="price-cell">${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 3 })} €</td>
@@ -131,50 +131,50 @@ async function fetchAccount() {
         let portfolioValue = '-';
         try {
             const earnResponse = await fetch('/api/earn/summary');
-            if(earnResponse.ok) {
+            if (earnResponse.ok) {
                 const earnData = await earnResponse.json();
-                if(earnData && earnData.totalBalance !== undefined) {
+                if (earnData && earnData.totalBalance !== undefined) {
                     portfolioValue = `${earnData.totalBalance} ${earnData.currency || 'EUR'}`;
                 }
             }
-        } catch(e) {
+        } catch (e) {
             console.warn("Failed to fetch earn summary", e);
         }
 
         // Fetch Identity Status
         try {
             const idResponse = await fetch('/api/identity');
-            if(idResponse.ok) {
+            if (idResponse.ok) {
                 const idData = await idResponse.json();
                 document.getElementById('identityStatus').textContent = idData.status || '-';
                 document.getElementById('identityStatus').style.color = idData.status === 'verified' ? 'var(--success-color)' : 'var(--text-primary)';
                 document.getElementById('riskLevel').textContent = idData.risk?.level || '-';
                 document.getElementById('verificationTier').textContent = idData.tier !== undefined ? `Tier ${idData.tier}` : '-';
             }
-        } catch(e) {
+        } catch (e) {
             console.warn("Failed to fetch identity status", e);
         }
 
         // Fetch Subaccounts
         try {
             const subResponse = await fetch('/api/subaccounts');
-            if(subResponse.ok) {
+            if (subResponse.ok) {
                 const subData = await subResponse.json();
                 const listEl = document.getElementById('subaccountsList');
-                if(subData && subData.length > 0) {
+                if (subData && subData.length > 0) {
                     listEl.innerHTML = subData.map(s => `<div class="info-row"><span class="info-label">${s.name || s.alias || 'Subaccount'}</span><span class="info-value" style="font-size: 13px;">${s.id}</span></div>`).join('');
                 } else {
                     listEl.textContent = 'No subaccounts found';
                 }
             }
-        } catch(e) {
+        } catch (e) {
             console.warn("Failed to fetch subaccounts", e);
         }
-        
+
         // Populate account data
         document.getElementById('userId').textContent = data.id || '-';
         document.getElementById('userEmail').textContent = data.email || 'Hidden';
-        
+
         const twoFactor = data.secondFactorAuth?.enabled ? 'Enabled' : 'Disabled';
         document.getElementById('twoFactorStatus').textContent = twoFactor;
         document.getElementById('twoFactorStatus').style.color = data.secondFactorAuth?.enabled ? 'var(--success-color)' : 'var(--danger-color)';
@@ -182,25 +182,25 @@ async function fetchAccount() {
         const person = data.person || {};
         document.getElementById('userName').textContent = person.name || '-';
         document.getElementById('userSurname').textContent = person.surname || '-';
-        
+
         const phone = data.phone || {};
         if (phone.number) {
             document.getElementById('userPhone').textContent = `+${phone.countryCode || ''} ${phone.number}`;
         } else {
-             document.getElementById('userPhone').textContent = typeof data.phone === 'string' ? data.phone : '-';
+            document.getElementById('userPhone').textContent = typeof data.phone === 'string' ? data.phone : '-';
         }
 
         const profile = data.profile || {};
         const currency = profile.currencyCode || data.currency || 'EUR';
         document.getElementById('userCurrency').textContent = currency.toUpperCase();
-        
-         document.getElementById('portfolioValue').textContent = portfolioValue;
-         
-         if (data.kyc_level !== undefined) {
-             document.getElementById('kycStatus').textContent = `Level ${data.kyc_level}`;
-         } else {
-              document.getElementById('kycStatus').textContent = 'Active';
-         }
+
+        document.getElementById('portfolioValue').textContent = portfolioValue;
+
+        if (data.kyc_level !== undefined) {
+            document.getElementById('kycStatus').textContent = `Level ${data.kyc_level}`;
+        } else {
+            document.getElementById('kycStatus').textContent = 'Active';
+        }
 
         result.style.display = 'block';
     } catch (err) {
@@ -213,7 +213,7 @@ async function fetchAccount() {
 
 async function fetchTicker() {
     const market = document.getElementById('marketInput').value.trim();
-    if(!market) return;
+    if (!market) return;
 
     const loader = document.getElementById('loader');
     const result = document.getElementById('result');
@@ -230,7 +230,7 @@ async function fetchTicker() {
         if (!response.ok || !data) {
             throw new Error(data.error || 'Ticker not found');
         }
-        
+
         let ticker = data;
         if (Array.isArray(data)) {
             const found = data.find(t => t.symbol === market || t.pair === market);
@@ -239,7 +239,7 @@ async function fetchTicker() {
             ticker = data[market];
         }
 
-        if (!ticker) throw new Error('Ticker data malformed'); 
+        if (!ticker) throw new Error('Ticker data malformed');
 
         document.getElementById('symbolDisplay').textContent = market.toUpperCase();
         document.getElementById('lastPrice').textContent = `${ticker.last || ticker.close || '-'} €`;
